@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/vote_main">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/voteing_bg_day">
+
+            <TextView
+                android:id="@+id/vote_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:layout_marginTop="15dp"
+                android:textColor="#ff191c22"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:id="@+id/vote_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/vote_title"
+                android:layout_marginLeft="15dp"
+                android:orientation="vertical"
+                android:paddingBottom="12dp">
+
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_below="@id/content_layout"
+            android:background="@drawable/voteing_bg_btn_day">
+            <TextView
+                android:id="@+id/voting_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="投票"
+                android:textColor="#ff7b7e86"
+                android:textSize="15sp" />
+        </RelativeLayout>
+        <ImageView
+            android:id="@+id/vote_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:src="@mipmap/voting_del_day" />
+    </RelativeLayout>
+</RelativeLayout>

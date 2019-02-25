@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:paddingRight="5dp">
+
+    <TextView
+        android:id="@+id/radio"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:background="@drawable/voteing_circle_icon_day"/>
+    <TextView
+        android:id="@+id/item_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/radio"
+        android:layout_marginLeft="10dp"
+        android:textColor="#ff7b7e86"
+        android:textSize="13sp"
+        />
+</RelativeLayout>
