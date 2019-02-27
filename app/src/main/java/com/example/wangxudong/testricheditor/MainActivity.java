@@ -1,9 +1,14 @@
 package com.example.wangxudong.testricheditor;
 
 import android.net.Uri;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -13,6 +18,7 @@ import richeditor.ImageItem;
 import richeditor.RichEditor;
 import richeditor.TextItem;
 import richeditor.VoteItem;
+import richeditor.view.RichImageView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,8 +32,37 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Uri uri = Uri.parse("android.resource://" + getApplicationContext().getPackageName() + "/" + R.mipmap.temp);
+                final ImageItem.Data data = new ImageItem.Data(uri);
+                richEditor.add(data);
 
-                richEditor.add(new ImageItem.Data(uri));
+
+               /* DataUtils dataUtils = new DataUtils(data);
+                dataUtils.regsiterUploadListener(new DataUtils.OnUploadListener() {
+                    @Override
+                    public void upload(ImageItem.Data data) {
+                        int position = richEditor.getRichEditorAdapter().getList().indexOf(data);
+                        richEditor.getRichEditorAdapter().notifyItemChanged(position, 1);
+                    }
+                });
+                dataUtils.upload();*/
+                int position = richEditor.getRichEditorAdapter().getList().indexOf(data);
+               OssManager.getInstance().upload(MainActivity.this, position, data, new OssManager.OnUploadListener() {
+                   @Override
+                   public void onProgress(int position, long currentSize, long totalSize) {
+                       data.setState(RichImageView.State.UPLOADING);
+                       data.setProgress((int) (currentSize/totalSize));
+                   }
+
+                   @Override
+                   public void onSuccess(int position, String uploadPath, String imageUrl) {
+                        data.setState(RichImageView.State.SUCCESS);
+                   }
+
+                   @Override
+                   public void onFailure(int position) {
+                        data.setState(RichImageView.State.FAIL);
+                   }
+               });
 
             }
         });
@@ -49,14 +84,24 @@ public class MainActivity extends AppCompatActivity {
         richEditor.registerWidget(new ImageItem());
         richEditor.registerWidget(new VoteItem());
 
-  /*      ArrayList<EditorItemData> list=new ArrayList<>();
-        list.add(new TextItem.Data("wwwww"));
-        list.add(new TextItem.Data("dddddd"));
-        list.add(new TextItem.Data("gggggg"));
-        list.add(new TextItem.Data("rrrrrr"));
-
-
-        richEditor.setList(list);*/
-
     }
+
+    private void uploadList(){
+        for (int i = 0 ; i < richEditor.getRichEditorAdapter().getList().size();i++){
+            if (richEditor.getRichEditorAdapter().getList().get(i) instanceof ImageItem.Data){
+                DataUtils dataUtils = new DataUtils((ImageItem.Data) richEditor.getRichEditorAdapter().getList().get(i));
+                dataUtils.regsiterUploadListener(new DataUtils.OnUploadListener() {
+                    @Override
+                    public void upload(ImageItem.Data data) {
+                        int position = richEditor.getRichEditorAdapter().getList().indexOf(data);
+                        richEditor.getRichEditorAdapter().notifyItemChanged(position, 1);
+                    }
+                });
+                dataUtils.upload();
+            }
+        }
+    }
+
+
+
 }

@@ -5,13 +5,18 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import richeditor.view.RichImageView;
 
 public class RichEditor extends FrameLayout implements IRichEditor {
 
@@ -39,7 +44,7 @@ public class RichEditor extends FrameLayout implements IRichEditor {
     private void init() {
         removeAllViews();
         rvEditor = new RecyclerView(getContext());
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         addView(rvEditor, layoutParams);
         richEditorAdapter = new RichEditorAdapter();
         richEditorAdapter.setRichEditor(this);
@@ -47,6 +52,7 @@ public class RichEditor extends FrameLayout implements IRichEditor {
         rvEditor.setLayoutManager(layoutManager);
         richEditorAdapter.registerItem(new TextItem());
         rvEditor.setAdapter(richEditorAdapter);
+        closeDefaultAnimator();
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,7 +60,16 @@ public class RichEditor extends FrameLayout implements IRichEditor {
             }
         });
         add(new TextItem.Data());
+
+
+        rvEditor.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                setDataState(newState != RecyclerView.SCROLL_STATE_IDLE);
+            }
+        });
     }
+
 
 
     /**
@@ -104,7 +119,7 @@ public class RichEditor extends FrameLayout implements IRichEditor {
             handledList.add(new TextItem.Data());
         } else {
             handledList.add(list.get(0));
-            for (int i = 1; i < list.size() - 1; i++) {
+            for (int i = 1; i < list.size(); i++) {
                 EditorItemData current = list.get(i);
                 EditorItemData last = handledList.get(handledList.size() - 1);
                 if (last.append(current)) {
@@ -132,14 +147,63 @@ public class RichEditor extends FrameLayout implements IRichEditor {
 
 
     private void addData(EditorItemData itemData) {
+        ArrayList<EditorItemData> list = richEditorAdapter.getList();
+
+        if (richEditorAdapter.getItemCount() == 0){
+            list.add(new TextItem.Data());
+            return;
+        }
+        int cursorPosition = getCursorPosition();
         if (itemData != null) {
-            richEditorAdapter.getList().add(itemData);
+            //先判断是否在edittext中间
+            ViewGroup parent = (ViewGroup) rvEditor.getLayoutManager().findViewByPosition(cursorPosition);
+            if (parent != null && parent.getChildCount() > 0 && parent.getChildAt(0) instanceof EditText){
+                int index = ((EditText) parent.getChildAt(0)).getSelectionStart();
+                if (index != ((EditText) parent.getChildAt(0)).getText().length() && ((EditText) parent.getChildAt(0)).length()>0){
+                    TextItem.Data data = (TextItem.Data) list.get(cursorPosition);
+                    String temp = data.getContent();
+                    data.setContent(temp.substring(0,index));
+                    list.add(cursorPosition + 1,new TextItem.Data(temp.substring(index,temp.length())));
+                }
+            }
+
+            if (cursorPosition == list.size() - 1){
+                list.add(itemData);
+                if (!(list.get(richEditorAdapter.getItemCount() - 1) instanceof TextItem.Data)){
+                    list.add(new TextItem.Data());
+                }
+            }else {
+                list.add(cursorPosition + 1,itemData);
+                if (!(list.get(cursorPosition + 2) instanceof TextItem.Data)){
+                    list.add(cursorPosition + 2,new TextItem.Data());
+                }
+
+            }
+
         }
 
-        if (richEditorAdapter.getItemCount() == 0
-                || !(richEditorAdapter.getList().get(richEditorAdapter.getItemCount() - 1) instanceof TextItem.Data)) {
-            richEditorAdapter.getList().add(new TextItem.Data());
+
+    }
+
+
+    public int getCursorPosition(){
+        for (int i = 0;i < richEditorAdapter.getList().size();i++){
+            ViewGroup parent = (ViewGroup) rvEditor.getChildAt(i);
+
+            if (parent != null && parent.getChildCount() > 0 && parent.getChildAt(0) instanceof EditText){
+                EditText editText = (EditText) parent.getChildAt(0);
+                if (editText.hasFocus()){
+                    return rvEditor.getChildLayoutPosition(parent);
+                }
+
+            }
+
         }
+        return richEditorAdapter.getList().size() -1;
+    }
+
+    public RecyclerView getRvEditor() {
+        return rvEditor;
     }
 
     @Override
@@ -151,6 +215,11 @@ public class RichEditor extends FrameLayout implements IRichEditor {
         add(null);
         focusLastItem();
     }
+
+    public RichEditorAdapter getRichEditorAdapter() {
+        return richEditorAdapter;
+    }
+
 
     @Override
     public void delete(EditorItemData data) {
@@ -169,4 +238,51 @@ public class RichEditor extends FrameLayout implements IRichEditor {
             }
         }
     }
+
+
+    private void setDataState(boolean isScrolling){
+        ArrayList<EditorItemData> list = richEditorAdapter.getList();
+        LinearLayoutManager manager = (LinearLayoutManager) rvEditor.getLayoutManager();
+        int firstVisibleItemPosition = manager.findFirstVisibleItemPosition();
+        int lastVisibleItemPosition = manager.findLastVisibleItemPosition();
+
+
+        List<EditorItemData> visibleList = list.subList(firstVisibleItemPosition,lastVisibleItemPosition+1);
+        for (EditorItemData data : isScrolling?list:visibleList){
+            if (data instanceof ImageItem.Data){
+                ImageItem.Data temp = (ImageItem.Data) data;
+                if (isScrolling && temp.state == RichImageView.State.UPLOADING){
+                    temp.setState(RichImageView.State.PAUSE);
+                }
+                if (!isScrolling && temp.state == RichImageView.State.PAUSE){
+                    temp.setState(RichImageView.State.UPLOADING);
+                }
+
+            }
+        }
+    }
+
+    /**
+     * 打开默认局部刷新动画
+     */
+    public void openDefaultAnimator() {
+        this.rvEditor.getItemAnimator().setAddDuration(120);
+        this.rvEditor.getItemAnimator().setChangeDuration(250);
+        this.rvEditor.getItemAnimator().setMoveDuration(250);
+        this.rvEditor.getItemAnimator().setRemoveDuration(120);
+        ((SimpleItemAnimator) this.rvEditor.getItemAnimator()).setSupportsChangeAnimations(true);
+    }
+
+    /**
+     * 关闭默认局部刷新动画
+     */
+    public void closeDefaultAnimator() {
+        this.rvEditor.getItemAnimator().setAddDuration(0);
+        this.rvEditor.getItemAnimator().setChangeDuration(0);
+        this.rvEditor.getItemAnimator().setMoveDuration(0);
+        this.rvEditor.getItemAnimator().setRemoveDuration(0);
+        ((SimpleItemAnimator) this.rvEditor.getItemAnimator()).setSupportsChangeAnimations(false);
+    }
+
+
 }

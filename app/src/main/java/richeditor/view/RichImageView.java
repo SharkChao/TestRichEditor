@@ -101,7 +101,7 @@ public class RichImageView extends FrameLayout {
     }
 
     public  enum State{
-        INIT,UPLOADING,SUCCESS,FAIL
+        INIT,UPLOADING,SUCCESS,FAIL,PAUSE
     }
 
 

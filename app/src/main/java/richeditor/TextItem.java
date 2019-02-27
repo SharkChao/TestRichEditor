@@ -71,7 +71,9 @@ public class TextItem extends EditorItem<TextItem.Data,TextItem.TextHolder> {
             this.content="";
         }
 
-
+        public String getContent() {
+            return content;
+        }
 
         public void setContent(String content) {
             this.content = content;

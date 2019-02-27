@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class RichEditorAdapter extends RecyclerView.Adapter {
 
@@ -61,6 +62,19 @@ public class RichEditorAdapter extends RecyclerView.Adapter {
 
 
     @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List payloads) {
+        if (payloads.isEmpty()){
+            onBindViewHolder(holder,position);
+        }else {
+            if (holder instanceof ImageItem.Holder){
+                ImageItem.Data data = (ImageItem.Data) itemDataList.get(position);
+                ((ImageItem.Holder) holder).richImg.uploading(data.progress,data.state);
+            }
+        }
+
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
        int itemType=getItemViewType(i);
        if(itemType==-1){
@@ -75,7 +89,7 @@ public class RichEditorAdapter extends RecyclerView.Adapter {
 
         if(dataClass.isInstance(itemDataList.get(i))
                 &&holderClass.isInstance(viewHolder)){
-            editorPool.get(itemType).bindView((EditorItemHolder) viewHolder,itemDataList.get(i),i);
+            editorPool.get(itemType).bindView((EditorItemHolder) viewHolder,itemDataList.get(i),viewHolder.getLayoutPosition());
         }
 
     }
