@@ -1,6 +1,7 @@
 package richeditor.view;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -65,8 +66,8 @@ public class RichImageView extends FrameLayout {
         });
     }
 
-    public void setImgUri(Uri uri){
-        ivContent.setImageURI(uri);
+    public void setImagePath(String path){
+        ivContent.setImageBitmap(BitmapFactory.decodeFile(path));
     }
 
 

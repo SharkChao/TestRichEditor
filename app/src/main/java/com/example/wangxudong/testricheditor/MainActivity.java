@@ -7,10 +7,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import org.devio.takephoto.app.TakePhoto;
+import org.devio.takephoto.app.TakePhotoActivity;
+import org.devio.takephoto.compress.CompressConfig;
+import org.devio.takephoto.model.TImage;
+import org.devio.takephoto.model.TResult;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import richeditor.EditorItem;
 import richeditor.EditorItemData;
@@ -20,7 +28,7 @@ import richeditor.TextItem;
 import richeditor.VoteItem;
 import richeditor.view.RichImageView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends TakePhotoActivity {
 
     RichEditor richEditor;
     @Override
@@ -31,39 +39,14 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_add_img).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri uri = Uri.parse("android.resource://" + getApplicationContext().getPackageName() + "/" + R.mipmap.temp);
-                final ImageItem.Data data = new ImageItem.Data(uri);
-                richEditor.add(data);
 
 
-               /* DataUtils dataUtils = new DataUtils(data);
-                dataUtils.regsiterUploadListener(new DataUtils.OnUploadListener() {
-                    @Override
-                    public void upload(ImageItem.Data data) {
-                        int position = richEditor.getRichEditorAdapter().getList().indexOf(data);
-                        richEditor.getRichEditorAdapter().notifyItemChanged(position, 1);
-                    }
-                });
-                dataUtils.upload();*/
-                int position = richEditor.getRichEditorAdapter().getList().indexOf(data);
-               OssManager.getInstance().upload(MainActivity.this, position, data, new OssManager.OnUploadListener() {
-                   @Override
-                   public void onProgress(int position, long currentSize, long totalSize) {
-                       data.setState(RichImageView.State.UPLOADING);
-                       data.setProgress((int) (currentSize/totalSize));
-                   }
-
-                   @Override
-                   public void onSuccess(int position, String uploadPath, String imageUrl) {
-                        data.setState(RichImageView.State.SUCCESS);
-                   }
-
-                   @Override
-                   public void onFailure(int position) {
-                        data.setState(RichImageView.State.FAIL);
-                   }
-               });
-
+                TakePhoto takePhoto = getTakePhoto();
+                CompressConfig config = new CompressConfig.Builder()
+                        .setMaxSize(50 * 1024)
+                        .setMaxPixel(800).create();
+                takePhoto.onEnableCompress(config,true);
+                takePhoto.onPickMultiple(9);
             }
         });
         findViewById(R.id.btn_add_vote).setOnClickListener(new View.OnClickListener() {
@@ -83,25 +66,49 @@ public class MainActivity extends AppCompatActivity {
 
         richEditor.registerWidget(new ImageItem());
         richEditor.registerWidget(new VoteItem());
-
     }
 
     private void uploadList(){
         for (int i = 0 ; i < richEditor.getRichEditorAdapter().getList().size();i++){
             if (richEditor.getRichEditorAdapter().getList().get(i) instanceof ImageItem.Data){
-                DataUtils dataUtils = new DataUtils((ImageItem.Data) richEditor.getRichEditorAdapter().getList().get(i));
-                dataUtils.regsiterUploadListener(new DataUtils.OnUploadListener() {
+                final ImageItem.Data data = (ImageItem.Data) richEditor.getRichEditorAdapter().getList().get(i);
+                OssManager.getInstance().upload(this, i, data , new OssManager.OnUploadListener() {
                     @Override
-                    public void upload(ImageItem.Data data) {
-                        int position = richEditor.getRichEditorAdapter().getList().indexOf(data);
-                        richEditor.getRichEditorAdapter().notifyItemChanged(position, 1);
+                    public void onProgress(int position, long currentSize, long totalSize) {
+
+                        data.setState(RichImageView.State.UPLOADING);
+                        data.setProgress((int) (100*currentSize/totalSize));
+                        richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
+                    }
+
+                    @Override
+                    public void onSuccess(int position, String uploadPath, String imageUrl) {
+                        data.setState(RichImageView.State.SUCCESS);
+                        richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
+                    }
+
+                    @Override
+                    public void onFailure(int position) {
+                        data.setState(RichImageView.State.FAIL);
+                        richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
                     }
                 });
-                dataUtils.upload();
             }
         }
+
+
     }
 
-
-
+    @Override
+    public void takeSuccess(TResult result) {
+        super.takeSuccess(result);
+        ArrayList<TImage> images = result.getImages();
+        ArrayList<EditorItemData>list = new ArrayList<>();
+        for (TImage image : images){
+            ImageItem.Data data = new ImageItem.Data(image.getCompressPath());
+            list.add(data);
+        }
+        richEditor.setList(list);
+        uploadList();
+    }
 }

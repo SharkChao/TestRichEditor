@@ -119,6 +119,11 @@ public class RichEditor extends FrameLayout implements IRichEditor {
             handledList.add(new TextItem.Data());
         } else {
             handledList.add(list.get(0));
+
+            if (!(list.get(0) instanceof TextItem.Data)){
+                handledList.add(new TextItem.Data());
+            }
+
             for (int i = 1; i < list.size(); i++) {
                 EditorItemData current = list.get(i);
                 EditorItemData last = handledList.get(handledList.size() - 1);
@@ -126,6 +131,9 @@ public class RichEditor extends FrameLayout implements IRichEditor {
                     continue;
                 } else {
                     handledList.add(current);
+                    if (!(current  instanceof TextItem.Data)){
+                        handledList.add(new TextItem.Data());
+                    }
                 }
             }
         }
@@ -136,17 +144,22 @@ public class RichEditor extends FrameLayout implements IRichEditor {
 
     @Override
     public void add(EditorItemData itemData) {
-        addData(itemData);
-        richEditorAdapter.notifyDataSetChanged();
-        focusLastItem();
+        ArrayList<EditorItemData>list = new ArrayList<>();
+        if (itemData != null){
+            list.add(itemData);
+        }
+
+        setList(list);
     }
+
 
     private void focusLastItem() {
         focusItem(richEditorAdapter.getItemCount()-1);
     }
 
 
-    private void addData(EditorItemData itemData) {
+
+    private void addListData(List<EditorItemData> addList) {
         ArrayList<EditorItemData> list = richEditorAdapter.getList();
 
         if (richEditorAdapter.getItemCount() == 0){
@@ -154,8 +167,9 @@ public class RichEditor extends FrameLayout implements IRichEditor {
             return;
         }
         int cursorPosition = getCursorPosition();
-        if (itemData != null) {
-            //先判断是否在edittext中间
+
+        if (list != null) {
+            //光标在edittext中间时需要拆分。
             ViewGroup parent = (ViewGroup) rvEditor.getLayoutManager().findViewByPosition(cursorPosition);
             if (parent != null && parent.getChildCount() > 0 && parent.getChildAt(0) instanceof EditText){
                 int index = ((EditText) parent.getChildAt(0)).getSelectionStart();
@@ -168,18 +182,16 @@ public class RichEditor extends FrameLayout implements IRichEditor {
             }
 
             if (cursorPosition == list.size() - 1){
-                list.add(itemData);
-                if (!(list.get(richEditorAdapter.getItemCount() - 1) instanceof TextItem.Data)){
-                    list.add(new TextItem.Data());
-                }
+                list.addAll(addList);
             }else {
-                list.add(cursorPosition + 1,itemData);
-                if (!(list.get(cursorPosition + 2) instanceof TextItem.Data)){
-                    list.add(cursorPosition + 2,new TextItem.Data());
+                if (list.get(cursorPosition + 1) != null){
+                    addList.get(addList.size() - 1).append(list.get(cursorPosition + 1));
+                    list.addAll(cursorPosition + 1,addList);
+                    list.remove(cursorPosition + 1 +addList.size() - 1);
                 }
+
 
             }
-
         }
 
 
@@ -208,11 +220,8 @@ public class RichEditor extends FrameLayout implements IRichEditor {
 
     @Override
     public void setList(ArrayList<EditorItemData> list) {
-        richEditorAdapter.getList().clear();
-        if(list!=null){
-            richEditorAdapter.getList().addAll(handleItemDataList(list));
-        }
-        add(null);
+        addListData(handleItemDataList(list));
+        richEditorAdapter.notifyDataSetChanged();
         focusLastItem();
     }
 
@@ -246,8 +255,13 @@ public class RichEditor extends FrameLayout implements IRichEditor {
         int firstVisibleItemPosition = manager.findFirstVisibleItemPosition();
         int lastVisibleItemPosition = manager.findLastVisibleItemPosition();
 
+        List<EditorItemData> visibleList;
+        if (lastVisibleItemPosition < list.size() -1){
+             visibleList = list.subList(firstVisibleItemPosition,lastVisibleItemPosition+1);
+        }else {
+            visibleList = list;
+        }
 
-        List<EditorItemData> visibleList = list.subList(firstVisibleItemPosition,lastVisibleItemPosition+1);
         for (EditorItemData data : isScrolling?list:visibleList){
             if (data instanceof ImageItem.Data){
                 ImageItem.Data temp = (ImageItem.Data) data;

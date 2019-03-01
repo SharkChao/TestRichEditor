@@ -1,5 +1,6 @@
 package richeditor;
 
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -45,17 +46,18 @@ public class ImageItem extends EditorItem<ImageItem.Data,ImageItem.Holder> {
                 data.progress = 0;
             }
         });
-        richImg.setImgUri(data.mUri);
+
+        richImg.setImagePath(data.getPath());
         richImg.uploading(data.progress,data.state);
     }
 
     public static class Data extends EditorItemData{
-        Uri mUri;
+        String mPath;
         RichImageView.State state = RichImageView.State.INIT;
         int progress;
 
-        public Data(Uri uri){
-            mUri = uri;
+        public Data(String path){
+            mPath = path;
         }
 
 
@@ -67,8 +69,8 @@ public class ImageItem extends EditorItem<ImageItem.Data,ImageItem.Holder> {
             return state;
         }
 
-        public Uri getUri() {
-            return mUri;
+        public String getPath() {
+            return mPath;
         }
 
         public void setProgress(int progress) {
