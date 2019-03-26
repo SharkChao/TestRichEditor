@@ -18,7 +18,7 @@
       android:layout_height="wrap_content"
       android:text="添加投票"/>
 
-  <richeditor.RichEditor
+  <com.hupu.first.richeditor.RichEditor
       android:id="@+id/editor"
       android:layout_width="match_parent"
       android:layout_height="match_parent"/>

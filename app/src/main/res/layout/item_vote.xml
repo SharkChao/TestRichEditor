@@ -4,10 +4,10 @@
     android:layout_height="match_parent"
     >
 
-    <richeditor.view.VotingView
+    <com.hupu.first.richeditor.view.VotingView
         android:id="@+id/view_vote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp">
-    </richeditor.view.VotingView>
+    </com.hupu.first.richeditor.view.VotingView>
 </FrameLayout>

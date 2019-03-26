@@ -1,16 +1,8 @@
 package com.example.wangxudong.testricheditor;
 
-import android.net.Uri;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.wangxudong.testricheditor.utils.SharedPreferencesMgr;
 
@@ -21,7 +13,6 @@ import org.devio.takephoto.model.TImage;
 import org.devio.takephoto.model.TResult;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import richeditor.EditorItem;
 import richeditor.EditorItemData;
@@ -29,7 +20,7 @@ import richeditor.ImageItem;
 import richeditor.RichEditor;
 import richeditor.TextItem;
 import richeditor.VoteItem;
-import richeditor.view.RichImageView;
+import com.hupu.first.richeditor.view.RichImageView;
 
 public class MainActivity extends TakePhotoActivity {
 

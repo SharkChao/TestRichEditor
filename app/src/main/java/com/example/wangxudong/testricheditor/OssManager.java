@@ -19,7 +19,6 @@ import com.alibaba.sdk.android.oss.model.PutObjectResult;
 import com.alibaba.sdk.android.oss.model.ResumableUploadRequest;
 import com.alibaba.sdk.android.oss.model.ResumableUploadResult;
 
-import java.util.HashMap;
 import java.util.Random;
 
 import io.reactivex.Observable;
@@ -27,7 +26,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import richeditor.ImageItem;
-import richeditor.view.RichImageView;
+import com.hupu.first.richeditor.view.RichImageView;
 
 public class OssManager {
     /**

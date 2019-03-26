@@ -2,9 +2,6 @@ package richeditor.view;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +11,6 @@ import android.widget.TextView;
 
 import com.example.wangxudong.testricheditor.R;
 
-import richeditor.ImageItem;
 
 public class RichImageView extends FrameLayout {
 

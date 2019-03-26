@@ -1,22 +1,12 @@
 package richeditor;
 
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.example.wangxudong.testricheditor.R;
-
-import java.util.HashMap;
-
-import richeditor.view.RichImageView;
+import com.hupu.first.richeditor.view.RichImageView;
 
 public class ImageItem extends EditorItem<ImageItem.Data,ImageItem.Holder> {
 

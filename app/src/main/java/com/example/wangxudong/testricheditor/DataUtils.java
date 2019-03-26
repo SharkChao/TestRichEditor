@@ -3,7 +3,7 @@ package com.example.wangxudong.testricheditor;
 import android.os.Handler;
 
 import richeditor.ImageItem;
-import richeditor.view.RichImageView;
+import com.hupu.first.richeditor.view.RichImageView;
 
 public class DataUtils {
     private ImageItem.Data mData;
