@@ -50,6 +50,11 @@ public class RichImageView extends FrameLayout {
         ivProgress = findViewById(R.id.img_progress);
         ivUploadGrayBg = findViewById(R.id.img_upload_gray);
 
+
+        tvProgress.setVisibility(View.GONE);
+        ivProgress.setVisibility(View.GONE);
+        ivUploadGrayBg.setVisibility(GONE);
+
         ivDelete.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {

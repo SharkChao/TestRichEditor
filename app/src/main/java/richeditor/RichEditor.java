@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import richeditor.view.RichImageView;
 
@@ -198,7 +202,7 @@ public class RichEditor extends FrameLayout implements IRichEditor {
     }
 
 
-    public int getCursorPosition(){
+    private int getCursorPosition(){
         for (int i = 0;i < richEditorAdapter.getList().size();i++){
             ViewGroup parent = (ViewGroup) rvEditor.getChildAt(i);
 
@@ -277,6 +281,75 @@ public class RichEditor extends FrameLayout implements IRichEditor {
     }
 
     /**
+     * 控件数据转string 存入sp
+     * @return
+     */
+    public String save(){
+        StringBuilder strBuilder = new StringBuilder();
+        for (EditorItemData data : richEditorAdapter.getList()){
+            if (data instanceof TextItem.Data){
+                strBuilder.append(((TextItem.Data) data).getContent());
+            }else if (data instanceof ImageItem.Data){
+                strBuilder.append("<p><img src=\"" + ((ImageItem.Data) data).getLinkUrl() + "\"/><lca>" + ((ImageItem.Data) data).getPath() + "</lca></p>");
+            }else if (data instanceof VoteItem.Data){
+                strBuilder.append("[vote]" + ((VoteItem.Data) data).getId() + "[/vote]<vote>" + ((VoteItem.Data) data).getLocalJson() + "</vote>");
+            }
+        }
+        return strBuilder.toString();
+    }
+
+
+    /**
+     * 从sp文件中恢复
+     */
+    public void restore(String saveInstance){
+        if (TextUtils.isEmpty(saveInstance)){
+            return;
+        }
+        saveInstance = saveInstance.replaceAll("</p>","");
+        saveInstance = saveInstance.replaceAll("<p>","");
+        saveInstance = saveInstance.replaceAll("</br>","");
+        ArrayList<String> pString = parseString(saveInstance);
+        String temp;
+        ArrayList<EditorItemData>list = new ArrayList<>();
+        if (pString.size() > 0){
+            for (int i = 0;i < pString.size();i++) {
+                temp = pString.get(i);
+                if (temp.startsWith("[vote]")){
+                    list.add(new VoteItem.Data(getId(temp),getJson(temp)));
+                }else if (temp.startsWith("<img")){
+                    String imgString = temp;
+                    String linkURL = imgString.split("\"")[1];
+                    String localURL =imgString.split("<lca>")[1].split("</lca>")[0];
+                    list.add(new ImageItem.Data(localURL,linkURL));
+                }else {
+                    list.add(new TextItem.Data(temp));
+                }
+            }
+            setList(list);
+
+        }
+
+    }
+
+    private ArrayList<String> parseString(String content) {
+        String regex ="(<img ([\\s\\S]*?)</lca>)|(\\[vote\\]([\\s\\S]*?)</vote>)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(content);
+        ArrayList<String> aList = new ArrayList<>();
+        int start = 0;
+        while (matcher.find()){
+            aList.add(content.substring(start,matcher.start()));
+            aList.add(content.substring(matcher.start(),matcher.end()));
+            start = matcher.end();
+        }
+        if (start < content.length()){
+            aList.add(content.substring(start,content.length()));
+        }
+        return aList;
+    }
+
+    /**
      * 打开默认局部刷新动画
      */
     public void openDefaultAnimator() {
@@ -298,5 +371,32 @@ public class RichEditor extends FrameLayout implements IRichEditor {
         ((SimpleItemAnimator) this.rvEditor.getItemAnimator()).setSupportsChangeAnimations(false);
     }
 
+
+    //解析结构获取当前投票id
+    private String getJson(String cotent){
+        if(TextUtils.isEmpty(cotent)){
+            return null;
+        }
+        String[] splitTab=cotent.split("<vote>");
+        String local=splitTab[splitTab.length-1];
+        if((!TextUtils.isEmpty(local))&&local.length()>7){
+            local=local.substring(0,local.length()-7);
+            return  local;
+        }
+        return null;
+    }
+    //解析结构获取当前投票的json描述
+    private String getId(String cotent){
+        if(TextUtils.isEmpty(cotent)){
+            return null;
+        }
+        String[] splitTab=cotent.split("\\[/vote\\]");
+        String local=splitTab[0];
+        if((!TextUtils.isEmpty(local))&&local.length()>6){
+            local=local.substring(6,local.length());
+            return  local;
+        }
+        return null;
+    }
 
 }

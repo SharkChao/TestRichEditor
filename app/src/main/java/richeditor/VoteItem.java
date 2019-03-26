@@ -51,6 +51,22 @@ public class VoteItem extends EditorItem<VoteItem.Data, VoteItem.VoteHolder>{
             this.localJson = localJson;
         }
 
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getLocalJson() {
+            return localJson;
+        }
+
+        public void setLocalJson(String localJson) {
+            this.localJson = localJson;
+        }
+
         @Override
         boolean append(EditorItemData itemData) {
             return false;

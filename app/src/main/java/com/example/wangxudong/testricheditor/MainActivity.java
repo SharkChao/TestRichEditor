@@ -7,9 +7,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import com.example.wangxudong.testricheditor.utils.SharedPreferencesMgr;
 
 import org.devio.takephoto.app.TakePhoto;
 import org.devio.takephoto.app.TakePhotoActivity;
@@ -31,68 +34,77 @@ import richeditor.view.RichImageView;
 public class MainActivity extends TakePhotoActivity {
 
     RichEditor richEditor;
+    TakePhoto takePhoto;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         richEditor=findViewById(R.id.editor);
+
+
+        initTakePhoto();
         findViewById(R.id.btn_add_img).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
-                TakePhoto takePhoto = getTakePhoto();
-                CompressConfig config = new CompressConfig.Builder()
-                        .setMaxSize(50 * 1024)
-                        .setMaxPixel(800).create();
-                takePhoto.onEnableCompress(config,true);
                 takePhoto.onPickMultiple(9);
+
             }
         });
         findViewById(R.id.btn_add_vote).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                richEditor.add(new VoteItem.Data("1","{\n" +
-                        "\t\"title\": \"投票测试标题\",\n" +
-                        "\t\"attr\": \"radio\",\n" +
-                        "\t\"select_pos\": \"3\",\n" +
-                        "\t\"name\": [\"测试选项1\", \"测试选项2\", \"测试选项3\"\n" +
-                        "\n" +
-                        "\t]\n" +
-                        "}"));
+                richEditor.add(new VoteItem.Data("1",getResources().getString(R.string.vote_local_json)));
 
             }
         });
 
         richEditor.registerWidget(new ImageItem());
         richEditor.registerWidget(new VoteItem());
+
+        richEditor.restore(SharedPreferencesMgr.getString("temp_string",""));
+
     }
 
+    private void initTakePhoto() {
+        takePhoto = getTakePhoto();
+        CompressConfig config = new CompressConfig.Builder()
+                .setMaxSize(50 * 1024)
+                .setMaxPixel(800).create();
+        takePhoto.onEnableCompress(config,true);
+    }
+
+    /**
+     * 上传至oss服务器
+     */
     private void uploadList(){
         for (int i = 0 ; i < richEditor.getRichEditorAdapter().getList().size();i++){
             if (richEditor.getRichEditorAdapter().getList().get(i) instanceof ImageItem.Data){
                 final ImageItem.Data data = (ImageItem.Data) richEditor.getRichEditorAdapter().getList().get(i);
-                OssManager.getInstance().upload(this, i, data , new OssManager.OnUploadListener() {
-                    @Override
-                    public void onProgress(int position, long currentSize, long totalSize) {
+                if (data.getState() == RichImageView.State.INIT && TextUtils.isEmpty(data.getLinkUrl())){
+                    OssManager.getInstance().upload(this, i, data , new OssManager.OnUploadListener() {
+                        @Override
+                        public void onProgress(int position, long currentSize, long totalSize) {
 
-                        data.setState(RichImageView.State.UPLOADING);
-                        data.setProgress((int) (100*currentSize/totalSize));
-                        richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
-                    }
+                            data.setState(RichImageView.State.UPLOADING);
+                            data.setProgress((int) (100*currentSize/totalSize));
+                            richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
+                        }
 
-                    @Override
-                    public void onSuccess(int position, String uploadPath, String imageUrl) {
-                        data.setState(RichImageView.State.SUCCESS);
-                        richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
-                    }
+                        @Override
+                        public void onSuccess(int position, String uploadPath, String imageUrl) {
+                            data.setState(RichImageView.State.SUCCESS);
+                            data.setLinkUrl(imageUrl);
+                            richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
+                        }
 
-                    @Override
-                    public void onFailure(int position) {
-                        data.setState(RichImageView.State.FAIL);
-                        richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
-                    }
-                });
+                        @Override
+                        public void onFailure(int position) {
+                            data.setState(RichImageView.State.FAIL);
+                            richEditor.getRichEditorAdapter().notifyItemChanged(position,1);
+                        }
+                    });
+                }
+
             }
         }
 
@@ -110,5 +122,11 @@ public class MainActivity extends TakePhotoActivity {
         }
         richEditor.setList(list);
         uploadList();
+    }
+
+    @Override
+    protected void onDestroy() {
+        SharedPreferencesMgr.setString("temp_string",richEditor.save());
+        super.onDestroy();
     }
 }

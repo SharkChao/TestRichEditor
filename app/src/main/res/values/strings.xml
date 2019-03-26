@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">TestRichEditor</string>
+    <string name="vote_local_json">{
+	"title": "投票测试标题",
+	"attr": "radio",
+	"select_pos": "3",
+	"name": ["测试选项1", "测试选项2", "测试选项3"]
+}</string>
 </resources>

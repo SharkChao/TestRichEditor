@@ -53,6 +53,8 @@ public class ImageItem extends EditorItem<ImageItem.Data,ImageItem.Holder> {
 
     public static class Data extends EditorItemData{
         String mPath;
+        String linkUrl;
+
         RichImageView.State state = RichImageView.State.INIT;
         int progress;
 
@@ -60,6 +62,10 @@ public class ImageItem extends EditorItem<ImageItem.Data,ImageItem.Holder> {
             mPath = path;
         }
 
+        public Data(String path, String linkUrl) {
+            this.mPath = path;
+            this.linkUrl = linkUrl;
+        }
 
         public void setState(RichImageView.State state) {
             this.state = state;
@@ -75,6 +81,14 @@ public class ImageItem extends EditorItem<ImageItem.Data,ImageItem.Holder> {
 
         public void setProgress(int progress) {
             this.progress = progress;
+        }
+
+        public String getLinkUrl() {
+            return linkUrl;
+        }
+
+        public void setLinkUrl(String linkUrl) {
+            this.linkUrl = linkUrl;
         }
 
         @Override

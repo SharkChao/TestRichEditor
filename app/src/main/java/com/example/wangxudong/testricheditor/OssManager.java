@@ -117,7 +117,6 @@ public class OssManager {
                                             return;
                                         }
                                         String imageUrl = request.getObjectKey();
-                                        Log.e("tag_url",result.getServerCallbackReturnBody());
 
                                         listener.onSuccess(position,data.getPath(),prefix + imageUrl);
                                     }
@@ -130,8 +129,8 @@ public class OssManager {
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        serviceException.printStackTrace();
-                                        clientException.printStackTrace();
+//                                        serviceException.printStackTrace();
+//                                        clientException.printStackTrace();
                                         if (listener == null){
                                             return;
                                         }
