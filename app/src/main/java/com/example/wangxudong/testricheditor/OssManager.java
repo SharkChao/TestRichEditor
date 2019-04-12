@@ -26,7 +26,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import richeditor.ImageItem;
-import com.hupu.first.richeditor.view.RichImageView;
+import richeditor.view.RichImageView;
 
 public class OssManager {
     /**

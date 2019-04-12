@@ -6,7 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.wangxudong.testricheditor.R;
-import com.hupu.first.richeditor.view.VotingView;
+
+import richeditor.view.VotingView;
 
 public class VoteItem extends EditorItem<VoteItem.Data, VoteItem.VoteHolder>{
 

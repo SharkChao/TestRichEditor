@@ -14,12 +14,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
-import com.hupu.first.richeditor.view.RichImageView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import richeditor.view.RichImageView;
 
 public class RichEditor extends FrameLayout implements IRichEditor {
 

@@ -20,7 +20,7 @@ import richeditor.ImageItem;
 import richeditor.RichEditor;
 import richeditor.TextItem;
 import richeditor.VoteItem;
-import com.hupu.first.richeditor.view.RichImageView;
+import richeditor.view.RichImageView;
 
 public class MainActivity extends TakePhotoActivity {
 

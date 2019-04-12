@@ -6,7 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.wangxudong.testricheditor.R;
-import com.hupu.first.richeditor.view.RichImageView;
+
+import richeditor.view.RichImageView;
 
 public class ImageItem extends EditorItem<ImageItem.Data,ImageItem.Holder> {
 
@@ -97,8 +98,6 @@ public class ImageItem extends EditorItem<ImageItem.Data,ImageItem.Holder> {
         }
 
     }
-
-
 
 
 }
